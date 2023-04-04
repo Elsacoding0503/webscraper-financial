@@ -1,5 +1,7 @@
 # yahoo stock
 import requests
+import pandas as pd
+from pandas import json_normalize
 from bs4 import  BeautifulSoup as bs
 import json
 from fake_useragent import UserAgent 
@@ -23,6 +25,10 @@ for row in rows:
     item["股價"] = row.find_all('div', {'class':'Fxg(1) Fxs(1) Fxb(0%) Ta(end) Mend($m-table-cell-space) Mend(0):lc Miw(68px)'})[0].text
     item["漲跌"] = row.find_all('div', {'class':'Fxg(1) Fxs(1) Fxb(0%) Ta(end) Mend($m-table-cell-space) Mend(0):lc Miw(74px)'})[0].text
     item["漲跌幅"] = row.find_all('div', {'class':'Fxg(1) Fxs(1) Fxb(0%) Ta(end) Mend($m-table-cell-space) Mend(0):lc Miw(74px)'})[1].text.replace("%", "")
+    price_yesterday = row.find_all('div', {'class':'Fxg(1) Fxs(1) Fxb(0%) Ta(end) Mend($m-table-cell-space) Mend(0):lc Miw(68px)'})[2].text
+    if price_yesterday > item["股價"]:
+        item["漲跌"] = '-' +item["漲跌"]
+        item["漲跌幅"] = '-' +item["漲跌幅"]
     list_all.append(item)
 
     
@@ -36,9 +42,14 @@ for offset in (30,60):
         dict_detail["股票名稱"]=i["symbolName"]
         dict_detail["股票代號"]=i["symbol"]
         dict_detail["股價"]=i["price"].split(".")[0]
-        dict_detail["漲跌"]=i["change"]
-        dict_detail["漲跌幅"]=i["changePercent"].replace("%", "")
+        dict_detail["漲跌"]=i["change"].replace("+","")
+        dict_detail["漲跌幅"]=i["changePercent"].replace("%", "").replace("+","")
         list_all.append(dict_detail)
         
-with open ('yahoo_上市光電.json', 'w') as f:
+with open ('上市光電.json', 'w') as f:
         json.dump(list_all, f, indent=4, ensure_ascii=False)
+
+# dict_all = {}
+# dict_all["results"] = list_all
+# data_all = json.dumps(dict_all, ensure_ascii=False)
+# df = json_normalize(dict_all["results"])
