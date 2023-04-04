@@ -1,6 +1,7 @@
 # 台灣期貨taifex
 import requests
 import pandas as pd
+import json
 from fake_useragent import UserAgent 
 
 ua = UserAgent()
